@@ -1461,12 +1461,25 @@ async function pdfDia(A){
 }
 
 async function post(obj){
-  let u=localStorage.getItem('urlSheets');if(!u){cfg();u=localStorage.getItem('urlSheets');if(!u)return null}
+  let u=localStorage.getItem('urlSheets');if(!u){await cfg();u=localStorage.getItem('urlSheets');if(!u)return null}
   const o={method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(obj)};
   try{const r=await fetch(u,o);return await r.json()}
   catch(e){try{await fetch(u,Object.assign({mode:'no-cors'},o));return {ok:true,sinConfirmar:true}}catch(e2){return {ok:false,error:String(e2)}}}
 }
-function cfg(){const a=prompt('Pega aquí el enlace de tu Apps Script (termina en /exec):',localStorage.getItem('urlSheets')||'');if(a!==null)localStorage.setItem('urlSheets',a.trim())}
+async function cfg(){
+  const a=prompt('Pega aquí el enlace de tu Apps Script (termina en /exec):',localStorage.getItem('urlSheets')||'');
+  if(a===null)return;
+  const u=a.trim();localStorage.setItem('urlSheets',u);if(!u)return;
+  aviso('Conectando y creando las hojas...');
+  const q=u+(u.indexOf('?')<0?'?':'&')+'accion=crear';
+  try{
+    const r=await (await fetch(q)).json();
+    aviso(r.ok?'Conectado. Hojas creadas: '+(r.hojas||[]).join(', ')+(r.errores&&r.errores.length?' (con avisos: '+r.errores.join('; ')+')':''):'Error en el script: '+(r.error||'sin detalle'));
+  }catch(e){
+    try{await fetch(q,{mode:'no-cors'});aviso('Enlace enviado. Abre tu Google Sheet: las hojas aparecen en unos segundos. Si no aparecen, revisa que el acceso sea "Cualquier persona".')}
+    catch(e2){aviso('No se pudo conectar. Revisa que el enlace termine en /exec y tengas internet.')}
+  }
+}
 
 async function cerrarDia(){
   const iso=$('cDia').value;if(!iso){alert('Elige el día a cerrar.');return}
@@ -1516,7 +1529,7 @@ async function aSheets(){
   const b=$('bSheets');b.disabled=true;b.textContent='Enviando...';
   const T=todos().map(x=>({id:x.id,iso:x.iso,hora:x.hora,tipo:x.tipo,lote:x.lote,jaba:x.jaba===''?'':(Number(x.jaba)||x.jaba),n:x.n,neto:x.neto,brix:x.brix,min:x.min,max:x.max,promRac:x.promRac,des:x.des}));
   const r=T.length?await post({accion:'sync',filas:T}):null;
-  aviso(!T.length?'No hay evaluaciones guardadas.':r===null?'Falta el enlace de Google Sheets (botón ⚙️).':r.ok?(r.sinConfirmar?'Enviado ('+T.length+' evaluaciones). Revisa tu hoja.':`Listo: ${r.nuevas} nuevas, ${r.actualizadas} actualizadas. Total en Sheets: ${r.total}.`):'Error: '+(r.error||'no se pudo enviar'));
+  aviso(!T.length?'No hay evaluaciones guardadas.':r===null?'Falta el enlace de Google Sheets (botón ⚙️).':r.ok?(r.sinConfirmar?'Enviado ('+T.length+' evaluaciones). Revisa tu hoja.':`Listo: ${r.nuevas} nuevas, ${r.actualizadas} actualizadas. Total en Sheets: ${r.total}.`+(r.errores&&r.errores.length?' Avisos: '+r.errores.join('; '):'')):'Error: '+(r.error||'no se pudo enviar'));
   b.disabled=false;b.textContent='☁️ Google Sheets';
 }
 function reporte(){
