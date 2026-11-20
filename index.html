@@ -1638,7 +1638,7 @@ function abrir(id){
 }
 
 // >>> OPCIONAL: pega aquí entre las comillas el enlace de Apps Script (termina en /exec). Si lo dejas vacío, se usa el botón ⚙️ de la app.
-const URL_SHEETS='';
+const URL_SHEETS='https://script.google.com/macros/s/AKfycbzMOhDUXfCyy38pR-xcOPizYK1gp1dO_xGhfETvhG2sMBXYFyc46WWaK3wyngqD67RwuA/exec'';
 const urlSheets=()=>localStorage.getItem('urlSheets')||URL_SHEETS;
 const $=id=>document.getElementById(id);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
