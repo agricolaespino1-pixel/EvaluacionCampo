@@ -1300,6 +1300,9 @@ function abrir(id){
   document.body.classList.remove('rep');document.body.classList.add('app');
 }
 
+// >>> OPCIONAL: pega aquí entre las comillas el enlace de Apps Script (termina en /exec). Si lo dejas vacío, se usa el botón ⚙️ de la app.
+const URL_SHEETS='https://script.google.com/macros/s/AKfycbzMOhDUXfCyy38pR-xcOPizYK1gp1dO_xGhfETvhG2sMBXYFyc46WWaK3wyngqD67RwuA/exec';
+const urlSheets=()=>localStorage.getItem('urlSheets')||URL_SHEETS;
 const $=id=>document.getElementById(id);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const LOGO="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJwAAAAoBAMAAAD5zY4dAAAAGFBMVEX///////z4//z8/Pzk/vKs58VdrH1Eq2+4wQqDAAAEiklEQVR42qWWwXIjSRGGv6z2YZaNkDLbB+CAVWptwGkZ2YYXmAhemSNPwBjHcEXVJV+Yi7tKno3YIQJXcpBsgz2xozW6SKFOffo78/+zSwAYpC560dL+wv/3Cvs3byEMtiT+ZLHo13DdHvqr8K8L/eabN9nWp//k4pcfn4Ps2999xJYfv4I7AWByEwUs5ly69fsvFN7/jJv16kt8RMCHxfvL9cvC/rqDfByuayjTVAkIdG37vGxt7Sh94X9bNEv9lnV+MZHds8Kfxt3DDgP4zs9j6fPLKlGofhzO+uaEAUI7HVYXlGdVLTP7Ob6LYayYwmqw3hYvR2HQXR6NqzKWR6f2L9waFhC9sDrOxt++2fqvP8sbL79QgD8/q/JPn03eUH78fJS6W3g7TpsqKJsRiy//NGWgHmuUszBLgOC1fCESTW1NO7p3mbT/8OWQd+cy5JaPxXUzidspH0xD6Z6ry2IRvrJwHnEKd02ogCzjy7x3LA0uQ8dRG6Wt/hb7CYWqgidlaFkWNxGmuwgtANyv61AwaFl03+H1NWAGUx2g5T2uXK/rwsEBl0IXhpa7EAdoPQOJNtHR9813IbY8gLWbs5t4x/rOvA65CyG27eXJwab9yvfrxEfKVqPdr3QXe/UWDC6mrSE//FanfNFrCWml76GLly4fYvZL1enmHPqrPY6hXxZqVdQLjc0fzJvQq+HbgertxG55Z64EU1XEhs26dOYLZ/bd0iCY1fmhd1GWmO9N2ra3nxZiPpRBtQiAa/tBGdR3LqZFRD8pAVmaAyIUW16LK7qfbAg8RXW2+h4Bu1NSGifqZtwpBCNtirBJBfXackagV8JIGkGnq2oHG8+Z9toq7N53wVw0mlfaHYqzo6JeU5FZzVdiprzdYQ41/fs+IXU/yANOqBXVvROHgpcK7m1rBmLqqGi516ykcR/d9puAV41Dl3M/d6oY5XFnP6arQYrm1cTIy95gGA6X8hZ8+XsQCB+IWquxzQ21ivbL+UFdLvRPAZqdi+4QKvOD4paAiiwijNuHjbvVKsL99x1UpbArKTwoeoqd5A+CqczhdByBqXqgOsQ7kEGjOxDiElN0/fcFqYrINI15j5NUH++5eVgYqiiBRa1QamgAEiJVGMRqhRgM1V3fvQ3nVHP1kqZD72ap1KeTyDBvY6pWbSkGTqFHGXuzwVmKuSNmqm1MrrM8mKpL4R8WD6m4fpdOH4aRFyKlEOaT9j1OxUU/0aQOuO/6Hr8KDEyUgqj0yMqLg6XFHnffXV3Up9GKT9NdmM+LOgWaF/GKlzl17N1ILYCLT4lQOWsUCpAfFhQs0x+hKnVO0NTaXUstU9SnkFpm/6woWtpUik8htQdPtZDI56Xd0Kxxwl5WfTRgiJy1DI2Gl5bDWY4p3sR4k0JsOYaSIOYWzgDOaLRQEgMQqgwcTLrSzaluTnUz5eG1h890sjpMwNSpc6oOcvrqs2w8Wdrjs7muhBLl1dpgHuSRNlKdVl8Po9qJV6WIQpk+vKulyNKA8pUfPni0/tcX1fRW/vRwpYy1f/vX07LS18u7/Q/6/jKr2a36FgAAAABJRU5ErkJggg==";
@@ -1461,13 +1464,13 @@ async function pdfDia(A){
 }
 
 async function post(obj){
-  let u=localStorage.getItem('urlSheets');if(!u){await cfg();u=localStorage.getItem('urlSheets');if(!u)return null}
+  let u=urlSheets();if(!u){await cfg();u=urlSheets();if(!u)return null}
   const o={method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(obj)};
   try{const r=await fetch(u,o);return await r.json()}
   catch(e){try{await fetch(u,Object.assign({mode:'no-cors'},o));return {ok:true,sinConfirmar:true}}catch(e2){return {ok:false,error:String(e2)}}}
 }
 async function cfg(){
-  const a=prompt('Pega aquí el enlace de tu Apps Script (termina en /exec):',localStorage.getItem('urlSheets')||'');
+  const a=prompt('Pega aquí el enlace de tu Apps Script (termina en /exec):',urlSheets());
   if(a===null)return;
   const u=a.trim();localStorage.setItem('urlSheets',u);if(!u)return;
   aviso('Conectando y creando las hojas...');
@@ -1492,7 +1495,7 @@ async function cerrarDia(){
     const reg=LSR('cierres').filter(c=>c.iso!==iso);
     reg.push({iso,hora:p2(new Date().getHours())+':'+p2(new Date().getMinutes()),n:A.n,prom:A.prom});
     localStorage.setItem('cierres',JSON.stringify(reg));
-    if(localStorage.getItem('urlSheets')){
+    if(urlSheets()){
       const r=await post({accion:'cierre',iso,horaCierre:reg[reg.length-1].hora,n:A.n,brixProm:A.prom,brixMin:A.bmin,brixMax:A.bmax,horaMax:A.horaMax,horaMin:A.horaMin,tendencia:A.tendencia,puntos:A.puntos});
       aviso(r&&r.ok?'Día cerrado y registrado en Google Sheets.':'Día cerrado. No se pudo registrar en Google Sheets.');
     }else aviso('Día cerrado. (Configura ⚙️ para registrarlo también en Google Sheets.)');
